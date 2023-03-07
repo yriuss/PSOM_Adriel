@@ -50,6 +50,8 @@ elseif strcmp(database,'motion_tracking')
     classes = 6;
 elseif strcmp(database, 'uofa')
     classes = 15;
+elseif strcmp(database, 'kitti')
+    classes = 15;
 end;
 
 
