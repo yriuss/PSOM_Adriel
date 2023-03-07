@@ -1,0 +1,40 @@
+% Marcondes Ricarte
+
+function [normalizeTrain, normalizeTest] = filterDataPercentualSamples(Model, train, test)
+
+    meanData = mean([train; test]);
+    stdData = std([train; test]);
+    % train
+    [row,col] = size(train);
+    [row,col] = max(train);
+    meanMatrix = repmat(meanData,row,1);
+    exist = (diffTrain + Model.fatorFilter*stdMatrix) > 0;
+    normalizeTrain = train;
+    for i = 1:row
+        %i
+        for j = 1:col
+            if exist(i,j) == 0
+                normalizeTrain(i,j) = 0;
+            end;
+        end;
+    end;        
+    % test
+    [row,col] = size(test);
+    meanMatrix = repmat(meanData,row,1);
+    stdMatrix = repmat(stdData,row,1);
+    diffTest = test-meanMatrix;
+    exist = (diffTest + stdMatrix) > 0;
+    normalizeTest = test;
+    for i = 1:row
+        %i
+        for j = 1:col
+            if exist(i,j) == 0
+                normalizeTest(i,j) = 0;
+            end;
+        end;
+    end;
+end
+
+
+% 100*sum(exist(:) == 0)/(1500*4200)
+% 100*sum(normalizeTrain(:) == 0)/(1500*4200)

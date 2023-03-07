@@ -1,0 +1,89 @@
+%
+%    (c) Sultan Alzahrani, PhD Student, Arizona State University.
+%    ssalzahr@asu.edu,  http://www.public.asu.edu/~ssalzahr/
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
+
+
+clear;
+
+load('fitBayes.mat');
+r = 1;
+k = 3;
+intailization_strategy = 2;
+file_used = 1;
+MaxIteration = round(200*rand());
+expoent = round(6*rand()) + 4;
+logliklihoodThreshold = rand() * 10^(-expoent);
+
+for cat = 1:Model.numClasses
+    x = SamplesTrain.data(train_labels == cat,:);
+    sizeX = size(x,1);
+    
+    membership=0;
+    sses = []
+    vect = 0;
+    for i = 1:r
+        % First do intialization
+        r
+        P(1,1) = NaN;
+        while isnan(P(1,1))
+            [means_init,converiances_init] = intialization_step(intailization_strategy,x,k,i);
+            % run GaussianMixtureLearning update E and M step until convergence reached or max iteration reached...
+            [means,converiances,P,log_p_self,liklihood,P_absolute] = GaussianMixtureLearning(x,means_init,converiances_init,k,i,MaxIteration,logliklihoodThreshold);
+            means_init_tracker{i} = means_init;
+            means_tracker{i} = means;
+            converiances_tracker{i} = converiances;
+            log_p_self_tracker{i}=log_p_self;
+            vect(i) = log_p_self(end)
+            P_tracker{i} = P;
+            %determine point membership based on highest probab for each point
+        end;
+        
+    end
+
+    for dataType = 1:2
+
+        if dataType == 1
+            x = SamplesTrain.data;
+        else
+            x = SamplesTest.data;
+        end;
+        sizeX = size(x,1);
+        [~,~,P,~,~] = GaussianMixtureLearningAll(x,means,converiances{1,2},liklihood,k,i); 
+    
+        [maxLog,idx] = max(vect);
+        P_tracker{idx} = P;
+           
+        [maxLog,idx] = max(vect);
+        best_P =  P_tracker{idx};
+
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%       
+        
+
+        for j=1:sizeX
+            maxVal = max(best_P(j,:));          
+
+            if dataType == 1
+                maxValTotalTrain(cat,j) = maxVal;
+            else
+                maxValTotalTest(cat,j) = maxVal;    
+            end;
+        end
+
+    end;
+end;
+
+[~,indexesTrain] = max(maxValTotalTrain);
+accurracyTrain = sum(indexesTrain == train_labels)/length(indexesTrain == train_labels);
+
+[~,indexesTest] = max(maxValTotalTest);
+accurracyTest = sum(indexesTest == test_labels)/length(indexesTest == test_labels);
+
+
+
+
+
+
+

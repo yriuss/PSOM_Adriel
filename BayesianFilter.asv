@@ -1,0 +1,94 @@
+% Marcondes Ricarte
+
+function [Model] = filterBayes(Classes, dataTrain, Labels)
+
+% Classes = 4; %Kmeans,TSOM, PbSOM
+ if Classes == 4
+%     k = 1;
+%     data = 'database\data4Classes.txt';
+%     label = 'database\labels4.txt';
+ elseif Classes == 8
+     k = 0;
+%     data = 'database\data8Classes.txt';
+%     label = 'database\labels8.txt';
+ elseif Classes == 67
+     k = 0;
+%     data = 'database\data67Classes.txt';
+%     label = 'database\labels67.txt';
+ end;
+
+
+
+%SamplesTrain = load(data)';
+[rowSamplesTrain, colSamplesTrain] = size(dataTrain);
+%disp('Database original.');
+%DatabaseStatistics(SamplesTrain);
+%Labels = load(label)' + 1; %Shift na classes
+SplitDataTrain = SplitData(Classes, dataTrain, Labels);
+
+
+maxValues = [];
+for i=1:Classes
+    maxValues = [maxValues max(SplitDataTrain{i}.data(:))];
+end;
+maxValue = max(maxValues);
+
+%%% Algorithm Build Model
+for i=1:Classes
+    [rowSplitDataTrain, colSplitDataTrain] = size(SplitDataTrain{i}.data);
+    SplitDataTrain{i}.frequency = zeros(rowSplitDataTrain,maxValue);
+    for j=1:rowSplitDataTrain %num de objetos
+        for k=1:colSplitDataTrain %num de imagens
+            F = SplitDataTrain{i}.data(j,k);
+            if F ~= 0
+                SplitDataTrain{i}.frequency(j, F) =  SplitDataTrain{i}.frequency(j, F) + 1; 
+            end
+        end
+    end
+    SplitDataTrain{i}.frequency = SplitDataTrain{i}.frequency/colSplitDataTrain;
+    SplitDataTrain{i}.p = colSplitDataTrain/colSamplesTrain;
+end;
+
+
+% Test
+numerator = zeros(rowSamplesTrain,maxValue);
+denominator = [];
+score = zeros(1,Classes);
+scores = [];
+for i=1:Classes
+    %SplitDataTrain{i}.frequency(SplitDataTrain{i}.frequency > 0) = 1; 
+    SplitDataTrain{i}.frequency = log(SplitDataTrain{i}.frequency);
+    SplitDataTrain{i}.frequency(isinf(SplitDataTrain{i}.frequency)) = 0;
+    SplitDataTrain{i}.p = SplitDataTrain{i}.p + k;
+    %SplitDataTrain{i}.p(isinf(SplitDataTrain{i}.p)) = 0;
+    denominator{i} = ((-SplitDataTrain{i}.frequency)/(SplitDataTrain{i}.p));
+    %denominator{i} = -SplitDataTrain{i}.frequency;
+end
+for j=1:colSamplesTrain
+    numerator = zeros(rowSamplesTrain,maxValue);
+    for i=1:rowSamplesTrain 
+        if SamplesTrain(i,j) > 0
+            numerator(i, SamplesTrain(i,j)) = 1;
+        end;
+    end; 
+    for i=1:Classes   
+        result = numerator./denominator{i};
+        result(isnan(result)) = 0;
+        result(isinf(result)) = 0;
+        score(i) = sum(sum(result));
+    end;
+    scores = [scores; score];
+    [value index] = max(score);
+    target(j) = index;
+end;
+
+mean = sum(target == Labels)/colSamplesTrain
+
+confuse = zeros(Classes, Classes);
+for i=1:colSamplesTrain
+    confuse(Labels(i), target(i)) = confuse(Labels(i), target(i)) + 1; 
+end;
+for i=1:Classes
+    confuse(i,:) = confuse(i,:)/sum(confuse(i,:));
+end;
+confuse

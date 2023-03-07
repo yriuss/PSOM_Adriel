@@ -1,0 +1,332 @@
+% Marcondes Ricarte
+
+function [Model, DeepSOM, winnerNode] = computeRelevanceEpochs(Model, DeepSOM, layer, sdataTrain, sdataTest, train_labels, test_labels, epoch, epochTotal, alpha)
+    
+    epsilon = 0.000001;
+
+    if Model.multiple.updateRelevance ~= 1
+        % exponencial        
+        tau = - epochTotal/ log(0.01/Model.multiple.updateRelevance);
+        alphaRelevance = Model.multiple.updateRelevance * exp(-[epoch]/tau);
+
+        %mean
+        
+    else
+        alphaRelevance = 1;
+    end;
+
+    if strcmp(Model.multiple.distanceType{layer},'relevance_sub_variance')
+        relevance = []; % compatibility
+
+        dataTrain = [];
+        if strcmp(Model.multiple.relevanceSelect{layer},'winner_var_inter') & strcmp(Model.multiple.relevanceSortType{layer},'mult')
+            for i = 1:Model.multiple.numToyProblem
+                selectedTrain = find( train_labels == i );
+                dataTrain = [dataTrain; DeepSOM{i,layer-1}.BMUsValuesTrain(selectedTrain,:) ];                        
+            end;
+            for i = 1:Model.multiple.numToyProblem
+                inter(i,:) = var(dataTrain);
+            end;            
+        elseif strcmp(Model.multiple.relevanceSelect{layer},'winner_var_means_inter') & strcmp(Model.multiple.relevanceSortType{layer},'mult')
+            dataTrain = [];
+            for i = 1:Model.multiple.numToyProblem
+                selectedTrain = find( train_labels == i );
+                dataTrain = [dataTrain; mean(DeepSOM{i,layer-1}.BMUsValuesTrain(selectedTrain,:)) ];                        
+            end;
+            for i = 1:Model.multiple.numToyProblem
+                inter(i,:) = var(dataTrain);
+            end;
+        elseif ( strcmp(Model.multiple.relevanceSelect{layer},'inter_pipeline') || strcmp(Model.multiple.relevanceSelect{layer},'inter_means_pipeline') )  ... 
+                & strcmp(Model.multiple.relevanceSortType{layer},'mult')
+            dataTrain = [];
+            for i = 1:Model.multiple.numToyProblem
+                dataTrain{i} = [];
+                for j = 1:Model.multiple.numToyProblem
+                    selectedTrain = find( train_labels == j );
+                    if  strcmp(Model.multiple.relevanceSelect{layer},'inter_pipeline') 
+                        dataTrain{i} = [dataTrain{i}; DeepSOM{i,layer-1}.BMUsValuesTrain(selectedTrain,:) ];  
+                    elseif strcmp(Model.multiple.relevanceSelect{layer},'inter_means_pipeline')
+                        dataTrain{i} = [dataTrain{i}; mean(DeepSOM{i,layer-1}.BMUsValuesTrain(selectedTrain,:)) ];   
+                    end;            
+                end;
+                inter(i,:) = var(dataTrain{i});
+            end; 
+        elseif  ( strcmp(Model.multiple.relevanceSelect{layer},'inter_pipeline_binary') || strcmp(Model.multiple.relevanceSelect{layer},'inter_means_pipeline_binary') )  ... 
+                & strcmp(Model.multiple.relevanceSortType{layer},'mult')
+            dataTrain = [];
+            for i = 1:Model.multiple.numToyProblem
+                dataTrain{i} = [];
+                dataTrainCat = [];
+                for j = 1:Model.multiple.numToyProblem
+                    if i ~= j
+                        selectedTrain = find( train_labels == j );
+                        if strcmp(Model.multiple.relevanceSelect{layer},'inter_pipeline_binary')
+                            dataTrain{i} = [dataTrain{i}; DeepSOM{i,layer-1}.BMUsValuesTrain(selectedTrain,:) ];     
+                        elseif strcmp(Model.multiple.relevanceSelect{layer},'inter_means_pipeline_binary')
+                            dataTrain{i} = [dataTrain{i}; mean(DeepSOM{i,layer-1}.BMUsValuesTrain(selectedTrain,:)) ];  
+                        end;
+                    else
+                        selectedTrain = find( train_labels == j );
+                        dataTrainCat = DeepSOM{i,layer-1}.BMUsValuesTrain(selectedTrain,:);
+                    end;
+                end;
+                inter(i,:) = varBinary(dataTrain{i}, mean(dataTrainCat));
+            end;             
+        end;
+        
+        
+        for i = 1:Model.multiple.numToyProblem %TODO inicialize
+            if layer == 1
+                [~,dim] = size(sdataTrain.data);
+            else
+                [~,dim] = size(DeepSOM{1,1}.BMUsValuesTrain);
+            end;
+            if (Model.multiple.relevancePercent{1,layer}(i)+Model.multiple.relevancePercent2{1,layer}(i)-1) > dim  
+                Model.multiple.relevancePercent2{1,layer}(i) = dim - Model.multiple.relevancePercent{1,layer}(i) + 1;
+            end;            
+        end;        
+        
+        for i = 1:Model.multiple.numToyProblem
+            [samples,~] = size(sdataTrain.data);                      
+            for j = 1:samples
+                if layer == 1
+                    x = sdataTrain.data(j,:);
+                else
+                    x = DeepSOM{i,layer-1}.BMUsValuesTrain(j,:);
+                end;
+                Dx = (DeepSOM{i,layer}.sMap.codebook(:,:) - x);
+                if strcmp(Model.multiple.distanceExpPosition,'extern')
+                    [~,winnerNode{i}(1,j)] =  min( sum( (DeepSOM{i,layer}.relevance') .* (Dx'.^2) ) );   
+                elseif strcmp(Model.multiple.distanceExpPosition,'inside')
+                    [~,winnerNode{i}(1,j)] =  min( nansum(  (DeepSOM{i,layer}.relevance' .* Dx') .^ Model.multiple.distanceExp ) );
+                end;                
+                %[~,winnerNode{i}(1,j)] =  min(sum( (DeepSOM{i,layer}.relevance') .* (Dx'.^2) ) );
+            end;
+            temp = zeros(1,Model.multiple.numMap(layer) );
+            for j = 1:length(winnerNode{i})
+                if train_labels(1,j) == i
+                    temp(1,winnerNode{i}(j)) = temp(1,winnerNode{i}(j)) + 1; 
+                end;  
+            end;
+            winnerNodeFrequency{i} = temp;
+            [winnerNodeFrequencySort{i},winnerNodeFrequencyIndexes{i}] = sort(winnerNodeFrequency{i},'descend');
+            relevanceOld = [];
+            relevanceSort = [];
+            relevanceSortIndexes = [];
+            if layer == 1
+                [~,dim] = size(sdataTrain.data);
+            else
+                [~,dim] = size(DeepSOM{i,layer-1}.BMUsValuesTrain);
+            end;
+
+        end;
+
+        
+       
+        
+        data = [];
+        for i = 1:Model.multiple.numToyProblem
+            for j = 1:Model.multiple.numMap(layer)  
+                if sum( (train_labels(1,:) == i) &  (winnerNode{i} == winnerNodeFrequencyIndexes{i}(1,j))   ) > 1
+                    indexes = (train_labels(1,:) == i) &  (winnerNode{i} == winnerNodeFrequencyIndexes{i}(1,j));
+                    if layer == 1
+                        data = [data; ( 1 - var(sdataTrain.data(indexes,:)) ) ];
+                    else
+                        data = [data; (1 - var(DeepSOM{i,layer-1}.BMUsValuesTrain(indexes,:))) ];
+                    end;                    
+                end;
+            end;
+       
+            if strcmp(Model.multiple.transformFunction{1,layer},'linear_cut_std_pipeline') || strcmp(Model.multiple.transformFunction{1,layer},'linear_pipeline')
+                [dataRow,~] = size(data);
+                if dataRow > 1
+                    minRelevanceGlobal(i,:) = min(data);
+                    meanRelevanceGlobal(i,:) = mean(data);
+                    stdRelevanceGlobal(i,:) = std(data);
+                    maxRelevanceGlobal(i,:) = max(data);
+                elseif dataRow == 1
+                    minRelevanceGlobal(i,:) = data;
+                    meanRelevanceGlobal(i,:) = data;
+                    stdRelevanceGlobal(i,:) = zeros(1,dim);
+                    maxRelevanceGlobal(i,:) = data;                   
+                end;
+                data = [];
+            end;            
+        end;  
+        if strcmp(Model.multiple.transformFunction{1,layer},'linear') || ...
+           strcmp(Model.multiple.transformFunction{1,layer},'linear_cut_std_global')
+            minRelevanceGlobal = min(data);
+            meanRelevanceGlobal = mean(data);
+            stdRelevanceGlobal = std(data);
+            maxRelevanceGlobal = max(data);
+        end;
+        if strcmp(Model.multiple.transformFunction{1,layer},'linear_cut_std_global') || ...
+           strcmp(Model.multiple.transformFunction{1,layer},'linear_cut_std_pipeline')     
+            minRelevanceGlobal = meanRelevanceGlobal + Model.multiple.transformFunctionCutStd * stdRelevanceGlobal;
+        end;
+
+        
+        for i = 1:Model.multiple.numToyProblem
+            for j = 1:Model.multiple.numMap(layer)     
+                %if sum( (train_labels(1,:) == i) &  (winnerNode{i} == winnerNodeFrequencyIndexes{i}(1,j))   ) > 1
+                    relevanceOld(j,:) = DeepSOM{i,layer}.relevance(j,:); 
+                    indexes = (train_labels(1,:) == i) &  (winnerNode{i} == winnerNodeFrequencyIndexes{i}(1,j));
+                    %% 1-var
+                    if layer == 1
+                        %DeepSOM{i,layer}.relevance(j,:) = 1 - var(sdataTrain.data(indexes,:));
+                        %DeepSOM{i,layer}.relevance(j,:) = 1 - var(sdataTrain.data(train_labels == i,:));
+                        DeepSOM{i,layer}.relevance(j,:) = 1 - var(DeepSOM{i,layer}.sMap.codebook(winnerNodeFrequency{i} > 0, :)); %DeepSOM{i,layer}.relevance(j,:) = 1 - var(DeepSOM{i,layer}.sMap.codebook); 
+                        %DeepSOM{i,layer}.relevance(j,:) = 1 - iqr(DeepSOM{i,layer}.sMap.codebook(winnerNodeFrequency{i} > 0, :));
+                    else
+                        %DeepSOM{i,layer}.relevance(j,:) = 1 - var(DeepSOM{i,layer-1}.BMUsValuesTrain(indexes,:));
+                        %DeepSOM{i,layer}.relevance(j,:) = 1 - var(DeepSOM{i,layer-1}.BMUsValuesTrain(train_labels == i,:));
+                        DeepSOM{i,layer}.relevance(j,:) = 1 - var(DeepSOM{i,layer}.sMap.codebook(winnerNodeFrequency{i} > 0, :)); %DeepSOM{i,layer}.relevance(j,:) = 1 - var(DeepSOM{i,layer}.sMap.codebook); 
+                        %DeepSOM{i,layer}.relevance(j,:) = 1 - iqr(DeepSOM{i,layer}.sMap.codebook(winnerNodeFrequency{i} > 0, :));
+                    end;
+                    
+                    if strcmp(Model.multiple.relevanceSortType{1,layer},'mult')      
+                        DeepSOM{i,layer}.relevance(j,:) = ( 1 - var(DeepSOM{i,layer-1}.BMUsValuesTrain(indexes,:)) ) ./ (1-inter(i,:)) ;
+                        DeepSOM{i,layer}.relevance(j,:) = DeepSOM{i,layer}.relevance(j,:) / max(DeepSOM{i,layer}.relevance(j,:));
+                    end;
+                    [relevanceSort(j,:), relevanceSortIndexes(j,:)] = sort(DeepSOM{i,layer}.relevance(j,:),'descend','MissingPlacement','last'); %sort(a,'descend','MissingPlacement','last')
+                    
+                    begin = Model.multiple.relevancePercent{1,layer}(1,i);
+                    tail = Model.multiple.relevancePercent{1,layer}(1,i) + Model.multiple.relevancePercent2{1,layer}(1,i) - 1;                      
+                    if tail > dim
+                        tail = dim;
+                        Model.multiple.relevancePercent2{1,layer}(1,i) = tail;
+                    end;
+
+
+                    
+                    if strcmp(Model.multiple.transformFunction{1,layer},'sigmoid')
+                        DeepSOM{i,layer}.relevance(j,:) = sigmoid(DeepSOM{i,layer}.relevance(j,:), 0.5, Model.multiple.transformFunctionParam); 
+                    elseif strcmp(Model.multiple.transformFunction{1,layer},'sigmoid_adaptative')
+                        DeepSOM{i,layer}.relevance(j,:) = sigmoid(DeepSOM{i,layer}.relevance(j,:), mean(DeepSOM{i,layer}.relevance(j,:)), Model.multiple.transformFunctionParam); 
+                    elseif strcmp(Model.multiple.transformFunction{1,layer},'exp')
+                        DeepSOM{i,layer}.relevance(j,:) = exp(Model.multiple.transformFunctionParam *(DeepSOM{i,layer}.relevance(j,:) - 1) ); 
+                    elseif strcmp(Model.multiple.transformFunction{1,layer},'equal_one')
+                        DeepSOM{i,layer}.relevance(j,:) = DeepSOM{i,layer}.relevance(j,:)  == 1; 
+                    elseif strcmp(Model.multiple.transformFunction{1,layer},'linear') || strcmp(Model.multiple.transformFunction{1,layer},'linear_cut_std_global') || ...
+                           strcmp(Model.multiple.transformFunction{1,layer},'linear_cut_std_pipeline') || strcmp(Model.multiple.transformFunction{1,layer},'linear_pipeline')   
+                        if strcmp(Model.multiple.transformFunction{1,layer},'linear')
+                            minRelevanceGlobal = min(DeepSOM{i,layer}.relevance(j,:));
+                            maxRelevanceGlobal = max(DeepSOM{i,layer}.relevance(j,:));
+                            DeepSOM{i,layer}.relevance(j,:) = (DeepSOM{i,layer}.relevance(j,:) - minRelevanceGlobal) ./ (maxRelevanceGlobal - minRelevanceGlobal);
+                        elseif strcmp(Model.multiple.transformFunction{1,layer},'linear_cut_std_global')
+                            DeepSOM{i,layer}.relevance(j,:) = (DeepSOM{i,layer}.relevance(j,:) - minRelevanceGlobal) ./ (maxRelevanceGlobal - minRelevanceGlobal);
+                            DeepSOM{i,layer}.relevance(j, DeepSOM{i,layer}.relevance(j,:) < 0) = 0;
+                            DeepSOM{i,layer}.relevance(j, isnan(DeepSOM{i,layer}.relevance(j,:))) = 0;
+                        elseif strcmp(Model.multiple.transformFunction{1,layer},'linear_cut_std_pipeline')  || strcmp(Model.multiple.transformFunction{1,layer},'linear_pipeline')  
+                            DeepSOM{i,layer}.relevance(j,:) = (DeepSOM{i,layer}.relevance(j,:) - minRelevanceGlobal(i,:)) ./ (maxRelevanceGlobal(i,:) - minRelevanceGlobal(i,:));
+                            DeepSOM{i,layer}.relevance(j, DeepSOM{i,layer}.relevance(j,:) < 0) = 0;                            
+                        end;     
+                        DeepSOM{i,layer}.relevance(j, isnan(DeepSOM{i,layer}.relevance(j,:)) ) = 1;
+                    end;
+
+                    if strcmp(Model.multiple.relevanceNorm{1,layer},'max') || strcmp(Model.multiple.relevanceNorm{1,layer},'max_sum')
+                        relevanceMin = nanmin(DeepSOM{i,layer}.relevance(j,:));
+                        relevanceMax = nanmax(DeepSOM{i,layer}.relevance(j,:));
+                        DeepSOM{i,layer}.relevance(j,:) = ((DeepSOM{i,layer}.relevance(j,:)-relevanceMin+epsilon)./(relevanceMax-relevanceMin+epsilon));
+                    end;                    
+
+                    if  strcmp(Model.multiple.relevanceNorm{1,layer},'max_sum')  || strcmp(Model.multiple.relevanceNorm{1,layer},'sum')
+                        relevanceSum = nansum(DeepSOM{i,layer}.relevance(j,:));
+                        DeepSOM{i,layer}.relevance(j,:) = dim * DeepSOM{i,layer}.relevance(j,:)/relevanceSum; % DeepSOM{i,layer}.relevance(j,:)/relevanceSum;                       
+                    end;                    
+                    
+                    DeepSOM{i,layer}.relevance(j,isnan(DeepSOM{i,layer}.relevance(j,:)) ) = 0;
+                    
+                    %%%%%%%%%%%%%%%%%%%%%%%%%%% update %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+                    % exponencial update
+                    %DeepSOM{i,layer}.relevance(j,:) = alphaRelevance * DeepSOM{i,layer}.relevance(j,:) +  (1-alphaRelevance) * relevanceOld(j,:);
+                    %DeepSOM{i,layer}.relevance(j,isnan(DeepSOM{i,layer}.relevance(j,:)) ) = 0;                 
+
+                    % exponencial^2 update
+                    if epoch == 1    
+                        Model.relevancies.r{i,j}(epoch,:) = DeepSOM{i,layer}.relevance(j,:);
+                        if layer == 1
+                            Model.relevancies.b{i,j}(epoch,:) = 1 - var(sdataTrain.data(train_labels==i,:));
+                        else
+                            Model.relevancies.b{i,j}(epoch,:) = 1 - var(DeepSOM{i,layer-1}.BMUsValuesTrain(train_labels==i,:));
+                        end;
+                        if strcmp(Model.multiple.relevanceNorm{1,layer},'max') || strcmp(Model.multiple.relevanceNorm{1,layer},'max_sum')
+                            relevanceMin = nanmin(Model.relevancies.b{i,j});
+                            relevanceMax = nanmax(Model.relevancies.b{i,j});
+                            Model.relevancies.b{i,j} = ((Model.relevancies.b{i,j}-relevanceMin+epsilon)./(relevanceMax-relevanceMin+epsilon));
+                        end;                        
+                    end;
+                    Model.relevancies.r{i,j}(epoch+1,:) = (alphaRelevance) * DeepSOM{i,layer}.relevance(j,:) + ...
+                        (1-alphaRelevance) * (  Model.relevancies.r{i,j}(epoch,:) - Model.relevancies.b{i,j}(epoch,:) );
+                    Model.relevancies.b{i,j}(epoch+1,:) = (alphaRelevance) * (Model.relevancies.r{i,j}(epoch+1,:)  ) + ...
+                        (1-alphaRelevance) * (  Model.relevancies.r{i,j}(epoch,:) - Model.relevancies.b{i,j}(epoch,:) );                    
+                    DeepSOM{i,layer}.relevance(j,:) = Model.relevancies.r{i,j}(epoch+1,:);
+
+
+                    % mean update
+% %                     if epoch == 1    
+% %                         Model.relevancies.r{i,j}(epoch,:) = relevanceOld(j,:);
+% %                     end;
+% %                     Model.relevancies.means{i,j}(epoch+1,:) = DeepSOM{i,layer}.relevance(j,:);
+% %                     if epoch <= Model.multiple.meanRelevance
+% %                         Model.relevancies.means{i,j}(epoch+1,:) = mean(Model.relevancies.means{i,j});
+% %                     else
+% %                         meanBegin = epoch - Model.multiple.meanRelevance + 1;
+% %                         Model.relevancies.means{i,j}(epoch+1,:) = mean(Model.relevancies.means{i,j}(meanBegin:end,:));
+% %                     end;
+
+
+                    
+                %else
+                    %relevanceSum = nansum(DeepSOM{i,layer}.relevance(j,:));       
+                    %DeepSOM{i,layer}.relevance(j,:) = DeepSOM{i,layer}.relevance(j,:)./relevanceSum; 
+                %end;
+            end;
+        end;
+
+        
+     if  strcmp(Model.multiple.relevanceNorm{1,layer},'max_attributes')    
+         relevanceGlobal = [];   
+         for i = 1:Model.multiple.numToyProblem   
+            relevanceGlobal = [relevanceGlobal; DeepSOM{i,layer}.relevance];
+         end;        
+     
+         relevanceMin = min(relevanceGlobal);
+         relevanceMax = max(relevanceGlobal);
+         
+         len = length(relevanceMin);
+         for i = 1:Model.multiple.numToyProblem 
+             for k = 1:len
+                DeepSOM{i,layer}.relevance(:,k) = (DeepSOM{i,layer}.relevance(:,k) - relevanceMin(k) + epsilon) / (relevanceMax(k) - relevanceMin(k) + epsilon);
+             end; 
+         end
+     elseif  strcmp(Model.multiple.relevanceNorm{1,layer},'max_attributes_pipeline')    
+         relevanceGlobal = [];   
+         for i = 1:Model.multiple.numToyProblem   
+             relevanceMin = min(DeepSOM{i,layer}.relevance);
+             relevanceMax = max(DeepSOM{i,layer}.relevance);
+             
+             len = length(relevanceMin);
+             for k = 1:len
+                DeepSOM{i,layer}.relevance(:,k) = (DeepSOM{i,layer}.relevance(:,k) - relevanceMin(k) + epsilon) / (relevanceMax(k) - relevanceMin(k) + epsilon);
+             end;              
+         end;        
+     elseif  strcmp(Model.multiple.relevanceNorm{1,layer},'max_global')    
+         relevanceGlobal = [];   
+         for i = 1:Model.multiple.numToyProblem   
+            relevanceGlobal = [relevanceGlobal; DeepSOM{i,layer}.relevance];
+         end;        
+         
+         [~,dim] = size(relevanceGlobal);
+         relevanceMin = ones(1,dim)*min(relevanceGlobal(:));
+         relevanceMax = ones(1,dim)*max(relevanceGlobal(:));
+         
+         len = length(relevanceMin);
+         for i = 1:Model.multiple.numToyProblem 
+             for k = 1:len
+                DeepSOM{i,layer}.relevance(:,k) = (DeepSOM{i,layer}.relevance(:,k) - relevanceMin(k) + epsilon) / (relevanceMax(k) - relevanceMin(k) + epsilon);
+             end; 
+         end     
+    end;       
+     
+end

@@ -1,0 +1,124 @@
+clear all
+
+load('data_debug.mat')
+
+
+% Train e test
+epochs = length(Model.test.debug.acurracyTrain);
+
+plot(1:epochs, Model.test.debug.acurracyTrain,'r' , 1:epochs, Model.test.debug.acurracyTest,'b')
+hold on
+plot([1:epochs],max(Model.test.debug.acurracyTrain)*ones(epochs),'r--')
+plot([1:epochs],max(Model.test.debug.acurracyTest)*ones(epochs),'b--')
+hold off
+xlabel('Epochs')
+ylabel('Acurracy')
+legend('Train','Test','Location','northeastoutside')
+title('Supervised')
+saveas(gcf, 'plots\acurracy.png')
+
+
+
+plot(1:epochs, mean(Model.test.debug.errorNoSupervisedCorrectTrain'),'r', 1:epochs, mean(Model.test.debug.errorNoSupervisedCorrectTest'),'b')
+hold on
+plot([1:epochs],min(mean(Model.test.debug.errorNoSupervisedCorrectTrain'))*ones(epochs),'r--')
+plot([1:epochs],min(mean(Model.test.debug.errorNoSupervisedCorrectTest'))*ones(epochs),'b--')
+hold off
+xlabel('Epochs')
+ylabel('Error')
+legend('Train','Test')
+title('Unsupervised')
+saveas(gcf, 'plots\unsupervised.png')
+
+
+
+
+for cat = 1:length(Model.test.debug.histogramTrain{1})
+    video = VideoWriter(['plots\histogram_cat_' int2str(cat) '.avi']);
+    open(video);
+    nodes = 30;
+    for t = 1:length(Model.test.debug.histogramTrain)-1
+        
+        maxs = max(max([Model.test.debug.histogramTrain{t}{cat}.hits Model.test.debug.histogramTest{t}{cat}.hits...
+            Model.test.debug.histogramTrain{t}{cat}.error Model.test.debug.histogramTest{t}{cat}.error])); 
+        
+        ratioTrain = Model.test.debug.histogramTrain{t}{cat}.error ./ Model.test.debug.histogramTrain{t}{cat}.hits;
+        ratioTest = Model.test.debug.histogramTest{t}{cat}.error ./ Model.test.debug.histogramTest{t}{cat}.hits;
+        
+        subplot(3,2,1)
+        bar(Model.test.debug.histogramTrain{t}{cat}.hits)
+        legend('Mean')
+        hold on
+        plot([1:epochs],mean(Model.test.debug.histogramTrain{t}{cat}.hits)*ones(epochs),'k--')
+        hold off
+        axis([0 nodes 0 maxs])
+        xlabel('Nodes')
+        ylabel('Frequency')
+        title('Hits Train')
+        
+        subplot(3,2,2)
+        bar(Model.test.debug.histogramTest{t}{cat}.hits)
+        hold on
+        plot([1:epochs],mean(Model.test.debug.histogramTest{t}{cat}.hits)*ones(epochs),'k--')
+        hold off        
+        axis([0 nodes 0 maxs])
+        xlabel('Nodes')
+        ylabel('Frequency')
+        title('Hits Test')
+                
+        subplot(3,2,3)
+        bar(Model.test.debug.histogramTrain{t}{cat}.error, 'r')
+        hold on
+        plot([1:epochs],mean(Model.test.debug.histogramTrain{t}{cat}.error)*ones(epochs),'k--')
+        hold off               
+        axis([0 nodes 0 maxs])
+        xlabel('Nodes')
+        ylabel('Frequency')
+        title('Error Train')
+        
+        subplot(3,2,4)
+        bar(Model.test.debug.histogramTest{t}{cat}.error, 'r')
+        hold on
+        plot([1:epochs],mean(Model.test.debug.histogramTest{t}{cat}.error)*ones(epochs),'k--')
+        hold off               
+        axis([0 nodes 0 maxs])
+        xlabel('Nodes')
+        ylabel('Frequency')
+        title('Error Test')
+
+        subplot(3,2,5)
+        bar(ratioTrain, 'm')
+        hold on
+        plot([1:epochs],mean(ratioTrain)*ones(epochs),'k--')
+        hold off          
+        axis([0 nodes 0 max([ratioTrain; ratioTest])])
+        xlabel('Nodes')
+        ylabel('Frequency')
+        title('Error Train')
+        
+        subplot(3,2,6)
+        bar(ratioTest, 'm')
+        hold on
+        plot([1:epochs],meanratioTest*ones(epochs),'k--')
+        hold off          
+        axis([0 nodes 0 max([ratioTrain; ratioTest])])
+        xlabel('Nodes')
+        ylabel('Frequency')
+        title('Error Test')
+        
+        
+        suptitle(['Cat ' num2str(cat) ' - Epochs ' num2str(t-1) '/' num2str(length(Model.test.debug.histogramTrain)-1) ]) 
+        set(gcf, 'Position', get(0, 'Screensize'));
+        for fps = 1:30
+            try
+            writeVideo(video,getframe(gcf))
+            catch ex
+                a= 1;
+            end;
+        end;
+
+        
+    end;
+    close(video);
+end;
+

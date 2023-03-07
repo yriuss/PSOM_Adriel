@@ -1,0 +1,203 @@
+% Marcondes Ricarte
+
+% [max(cell2mat(data(:, 83:86))); max(cell2mat(data(:, 87:90))); max(cell2mat(data(:, 91:94)))]
+% [max(cell2mat(data(:, 27:33))); max(cell2mat(data(:, 34:40))); max(cell2mat(data(:, 41:47))); max(cell2mat(data(:, 48:54)));  max(cell2mat(data(:, 55:61))); max(cell2mat(data(:, 62:68))); max(cell2mat(data(:, 69:75))); max(cell2mat(data(:, 76:82)))]
+
+clear all;
+
+database = 'uofa'; % ['wine','15_Scenes', 'LabelMe_8','8_Sports','67_Indoors','heart','vehicle','coil','yale','caltech_101','cifar_10','iris','ionosphere',
+                         % 'motion_tracking','segmentation','usps','digits','sun_rgbd']  
+type = 'multiple'; % ['multiple','probabilistic']
+layer = 1; % multiple
+
+%if layer == 5
+%    flagRelevanceSet = 'yes';
+%else
+   flagRelevanceSet = 'no';
+%end
+
+
+if strcmp(type,'single')
+    path = ['logs/results/' database '/single']; % ['logs/results/15_Scenes/single', 'logs/results/LabelMe_8/single']
+elseif strcmp(type,'multiple')
+    path = ['logs/results/' database '/multiple'];
+elseif strcmp(type,'probabilistic')
+    path = ['logs/results/' database '/probabilistic'];
+end
+files = what(path);
+len = length(files.mat);
+
+
+
+if strcmp(type,'multiple')
+    col = 20;
+    data = cell(len, col);
+    for i = 1:len
+        i
+        %files.mat(i)
+        strFator = ['['];
+        strFatorBase = ['['];
+        load([path,'/',char(files.mat(i))]);
+        if layer == 1
+            data(i,1) = cellstr(Model.single.normalizeType); %cellstr(Model.multiple.relevanceType(layer));
+        else
+            data(i,1) = cellstr(Model.multiple.normalizeType(layer-1));
+        end;
+        data(i,2) = cellstr(Model.multiple.inputPrototype(layer)); %cellstr(Model.multiple.normalizeRelevance(layer));
+        inicializeMode = Model.multiple.inicializeMode;
+        if strcmp(inicializeMode,'samples_unique')
+            inicializeMode = 'samples';
+        end
+        data(i,3) = cellstr(Model.multiple.functionLearn(layer));  
+        data(i,2) = num2cell(Model.multiple.updateRelevance); %num2cell(Model.multiple.relevancePercent3{1,layer}(1));
+        data(i,3) = num2cell(Model.multiple.unlearnedRate(layer));
+        data(i,4) = num2cell(Model.multiple.numMap(layer));
+%        data(i,5) = num2cell(Model.multiple.centersThreshold(layer));
+        data(i,6) = cellstr(Model.multiple.relevanceSelect(layer));
+        data(i,7) = num2cell(Model.multiple.numMap(layer));
+        data(i,8) = num2cell(Model.multiple.trainlen(layer));
+        data(i,9) = num2cell(Model.multiple.a(layer));
+        data(i,10) = num2cell(Model.multiple.aMin(layer));
+        data(i,11) = num2cell(Model.multiple.window(layer));
+        data(i,12) = num2cell(Model.multiple.updatePrototype(layer));
+        data(i,13) = num2cell(Model.multiple.relevanceFatorStd);
+        data(i,14) = num2cell(Model.multiple.transformFunctionCutStd); %num2cell(Model.multiple.centersThreshold(layer)); 
+        
+        data(i,15) = num2cell(Model.multiple.transformFunctionParam);
+%       data(i,16) = num2cell(Model.multiple.distanceExp); 
+%      data(i,17) = num2cell(Model.multiple.attributes(1)); 
+        
+        data(i,18) = num2cell(Model.test.layer{layer+1}.meanTest);
+        data(i,19) = num2cell(Model.test.layer{layer+1}.stdTest);
+        %%
+        %data(i,19) = num2cell(mean(Model.test.layer{layer+1}.scoreTest(1:10)));
+        %%
+        data(i,20) = num2cell(Model.test.layer{layer+1}.meanTrain);
+        data(i,21) = num2cell(Model.test.layer{layer+1}.stdTrain);
+        lenDensity = length(Model.test.layer{layer+1}.meanAcurracyDensityTest);
+        
+        [~, maxIndexDensity] = ...
+            max(Model.test.layer{layer+1}.meanAcurracyDensityTest(2:lenDensity));
+        maxIndexDensity = maxIndexDensity + 1;
+
+% %       data(i,22) = num2cell(mean(Model.test.layer{layer+1}.scoreTestOld));
+% %       data(i,23) = num2cell(std(Model.test.layer{layer+1}.scoreTestOld));
+% %        
+% %       data(i,24) = num2cell(Model.test.layer{layer+1}.meanTest - mean(Model.test.layer{layer+1}.scoreTestOld));
+          
+% %        data(i,22) = num2cell(Model.test.layer{1,layer+1}.meanScoreSubNetworkTest);
+% %        data(i,23) = num2cell(Model.test.layer{1,layer+1}.meanScoreSubNetworkTrain);
+% %        data(i,24) = num2cell(Model.test.layer{1,layer+1}.stdScoreSubNetworkTest);
+% %        data(i,25) = num2cell(Model.test.layer{1,layer+1}.stdScoreSubNetworkTrain);   
+               
+       data(i,26) = cellstr(char(files.mat(i)));
+       
+% %        data(i,27) = num2cell(mean(Model.test.layer{layer+1}.scoreTestOld));
+% %        data(i,28) = num2cell(mean(Model.test.layer{layer+1}.scoreTrainOld));
+% %  
+% %        data(i,29) = num2cell(mean(Model.test.layer{layer+1}.scoreTestFirstMax));
+% %        data(i,30) = num2cell(mean(Model.test.layer{layer+1}.scoreTrainFirstMax)); 
+% %        
+% %        data(i,31) = num2cell(mean(Model.test.layer{layer+1}.scoreTestLastMax));
+% %        data(i,32) = num2cell(mean(Model.test.layer{layer+1}.scoreTrainLastMax));  
+% %        
+% %        data(i,33) = num2cell( mean(Model.test.layer{layer+1}.scoreTest) - mean(Model.test.layer{layer+1}.scoreTestOld) );  
+       
+       if strcmp(flagRelevanceSet,'yes') 
+           % score
+           data(i,27) = num2cell(Model.test.layer{layer+1}.scores.setRel.meanScoreSetRelTest);
+           data(i,28) = num2cell(Model.test.layer{layer+1}.scores.setBiggerRatioRel.meanScoreSetRelTest); % Bigger ratio
+           data(i,29) = num2cell(Model.test.layer{layer+1}.scores.setSmallerRatioRel.meanScoreSetRelTest); % Smaller
+           data(i,30) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatRel.meanScoreSetRelTest); % category
+           data(i,31) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllRel.meanScoreSetRelTest); % all
+           data(i,32) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatSecondRuleRel.meanScoreSetRelTest); % category second rule 
+           data(i,33) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllSecondRuleRel.meanScoreSetRelTest); % all second rule
+            
+           % ratio all
+           data(i,34) = num2cell(Model.test.layer{layer+1}.scores.setRel.meanRatioActivationsSetRelTest);
+           data(i,35) = num2cell(Model.test.layer{layer+1}.scores.setBiggerRatioRel.meanRatioActivationsSetRelTest); % Bigger ratio
+           data(i,36) = num2cell(Model.test.layer{layer+1}.scores.setSmallerRatioRel.meanRatioActivationsSetRelTest); % Smaller
+           data(i,37) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatRel.meanRatioActivationsSetRelTest); % category
+           data(i,38) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllRel.meanRatioActivationsSetRelTest); % all
+           data(i,39) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatSecondRuleRel.meanRatioActivationsSetRelTest); % category second rule 
+           data(i,40) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllSecondRuleRel.meanRatioActivationsSetRelTest); % all second rule
+
+           % ratio correct
+           data(i,41) = num2cell(Model.test.layer{layer+1}.scores.setRel.meanRatioCorrectActivationsSetRelTrain);
+           data(i,42) = num2cell(Model.test.layer{layer+1}.scores.setBiggerRatioRel.meanRatioCorrectActivationsSetRelTrain); % Bigger ratio
+           data(i,43) = num2cell(Model.test.layer{layer+1}.scores.setSmallerRatioRel.meanRatioCorrectActivationsSetRelTrain); % Smaller
+           data(i,44) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatRel.meanRatioCorrectActivationsSetRelTrain); % category
+           data(i,45) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllRel.meanRatioCorrectActivationsSetRelTrain); % all
+           data(i,46) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatSecondRuleRel.meanRatioCorrectActivationsSetRelTrain); % category second rule 
+           data(i,47) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllSecondRuleRel.meanRatioCorrectActivationsSetRelTrain); % all second rule 
+           
+           % ratio correct correct
+           data(i,48) = num2cell(Model.test.layer{layer+1}.scores.setRel.meanRatioCorrectCorrectActivationsSetRelTest);
+           data(i,49) = num2cell(Model.test.layer{layer+1}.scores.setBiggerRatioRel.meanRatioCorrectCorrectActivationsSetRelTest); % Bigger ratio
+           data(i,50) = num2cell(Model.test.layer{layer+1}.scores.setSmallerRatioRel.meanRatioCorrectCorrectActivationsSetRelTest); % Smaller
+           data(i,51) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatRel.meanRatioCorrectCorrectActivationsSetRelTest); % category
+           data(i,52) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllRel.meanRatioCorrectCorrectActivationsSetRelTest); % all
+           data(i,53) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatSecondRuleRel.meanRatioCorrectCorrectActivationsSetRelTest); % category second rule 
+           data(i,54) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllSecondRuleRel.meanRatioCorrectCorrectActivationsSetRelTest); % all second rule 
+           
+           % ratio correct error
+           data(i,55) = num2cell(Model.test.layer{layer+1}.scores.setRel.meanRatioCorrectErrorActivationsSetRelTest);
+           data(i,56) = num2cell(Model.test.layer{layer+1}.scores.setBiggerRatioRel.meanRatioCorrectErrorActivationsSetRelTest); % Bigger ratio
+           data(i,57) = num2cell(Model.test.layer{layer+1}.scores.setSmallerRatioRel.meanRatioCorrectErrorActivationsSetRelTest); % Smaller
+           data(i,58) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatRel.meanRatioCorrectErrorActivationsSetRelTest); % category
+           data(i,59) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllRel.meanRatioCorrectErrorActivationsSetRelTest); % all
+           data(i,60) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatSecondRuleRel.meanRatioCorrectErrorActivationsSetRelTest); % category second rule 
+           data(i,61) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllSecondRuleRel.meanRatioCorrectErrorActivationsSetRelTest); % all second rule            
+
+           % ratio error
+           data(i,62) = num2cell(Model.test.layer{layer+1}.scores.setRel.meanRatioErrorActivationsSetRelTest);
+           data(i,63) = num2cell(Model.test.layer{layer+1}.scores.setBiggerRatioRel.meanRatioErrorActivationsSetRelTest); % Bigger ratio
+           data(i,64) = num2cell(Model.test.layer{layer+1}.scores.setSmallerRatioRel.meanRatioErrorActivationsSetRelTest); % Smaller
+           data(i,65) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatRel.meanRatioErrorActivationsSetRelTest); % category
+           data(i,66) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllRel.meanRatioErrorActivationsSetRelTest); % all
+           data(i,67) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatSecondRuleRel.meanRatioErrorActivationsSetRelTest); % category second rule 
+           data(i,68) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllSecondRuleRel.meanRatioErrorActivationsSetRelTest); % all second rule           
+           
+           % ratio error correct
+           data(i,69) = num2cell(Model.test.layer{layer+1}.scores.setRel.meanRatioErrorCorrectActivationsSetRelTest);
+           data(i,70) = num2cell(Model.test.layer{layer+1}.scores.setBiggerRatioRel.meanRatioErrorCorrectActivationsSetRelTest); % Bigger ratio
+           data(i,71) = num2cell(Model.test.layer{layer+1}.scores.setSmallerRatioRel.meanRatioErrorCorrectActivationsSetRelTest); % Smaller
+           data(i,72) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatRel.meanRatioErrorCorrectActivationsSetRelTest); % category
+           data(i,73) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllRel.meanRatioErrorCorrectActivationsSetRelTest); % all
+           data(i,74) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatSecondRuleRel.meanRatioErrorCorrectActivationsSetRelTest); % category second rule 
+           data(i,75) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllSecondRuleRel.meanRatioErrorCorrectActivationsSetRelTest); % all second rule   
+
+           % ratio error error
+           data(i,76) = num2cell(Model.test.layer{layer+1}.scores.setRel.meanRatioErrorErrorActivationsSetRelTest);
+           data(i,77) = num2cell(Model.test.layer{layer+1}.scores.setBiggerRatioRel.meanRatioErrorErrorActivationsSetRelTest); % Bigger ratio
+           data(i,78) = num2cell(Model.test.layer{layer+1}.scores.setSmallerRatioRel.meanRatioErrorErrorActivationsSetRelTest); % Smaller
+           data(i,79) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatRel.meanRatioErrorErrorActivationsSetRelTest); % category
+           data(i,80) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllRel.meanRatioErrorErrorActivationsSetRelTest); % all
+           data(i,81) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceCatSecondRuleRel.meanRatioErrorErrorActivationsSetRelTest); % category second rule 
+           data(i,82) = num2cell(Model.test.layer{layer+1}.scores.setVarianceDistanceAllSecondRuleRel.meanRatioErrorErrorActivationsSetRelTest); % all second rule   
+           
+           
+           data(i,83) = num2cell(Model.test.layer{3}.meanRatioActivationsTest);
+          data(i,84) = num2cell(Model.test.layer{4}.meanRatioActivationsTest);
+          data(i,85) = num2cell(Model.test.layer{5}.meanRatioActivationsTest);
+          data(i,86) = num2cell(Model.test.layer{6}.meanRatioActivationsTest);
+           
+           data(i,87) = num2cell(Model.test.layer{3}.meanRatioCorrectActivationsTest);
+          data(i,88) = num2cell(Model.test.layer{4}.meanRatioCorrectActivationsTest);
+          data(i,89) = num2cell(Model.test.layer{5}.meanRatioCorrectActivationsTest);
+          data(i,90) = num2cell(Model.test.layer{6}.meanRatioCorrectActivationsTest);      
+
+           data(i,91) = num2cell(Model.test.layer{3}.meanRatioErrorActivationsTest);
+          data(i,92) = num2cell(Model.test.layer{4}.meanRatioErrorActivationsTest);
+          data(i,93) = num2cell(Model.test.layer{5}.meanRatioErrorActivationsTest);
+          data(i,94) = num2cell(Model.test.layer{6}.meanRatioErrorActivationsTest);                 
+           
+           data(i,95) = num2cell(Model.test.layer{2}.meanRatioActivationsTest);
+          data(i,96) = num2cell(Model.test.layer{2}.meanRatioCorrectActivationsTest);
+          data(i,97) = num2cell(Model.test.layer{2}.meanRatioErrorActivationsTest);               
+           
+       end;
+       
+    end;
+
+end;

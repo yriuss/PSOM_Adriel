@@ -1,0 +1,94 @@
+% Marcondes Ricarte
+
+function [Model, DeepSOM, train_labels, test_labels, SamplesTrain, SamplesTest] = computeWeightsFitBayes(Model, DeepSOM, SamplesTrain, SamplesTest, layer, train_labels, test_labels, r)
+
+
+    [~,dim] = size(SamplesTrain.data);
+    
+    
+    experiments = 5;
+    if r == 1
+        for exp = 1:experiments
+            expoente = round(8 * rand()) + 2;
+            params = round(200 * rand()) + 20;
+            Model.bayes.epochs(exp) = params;
+            Model.bayes.nodes(exp) = Model.multiple.numMap(layer); %round(8 * rand()) + 4;   
+            expoente = round(8 * rand()) + 2;
+            Model.bayes.regularizationValue(exp) =  10^(-expoente) * rand() + 10^(-expoente-1);
+        end;
+    end;
+    
+     
+    for exp = 1:experiments
+        [r exp]
+
+        
+        [accuracyTrain, accuracyTest] = BayesSOM(Model, DeepSOM, SamplesTrain, SamplesTest, layer, train_labels, test_labels, r, Model.bayes.params(exp), Model.bayes.regularizationValue(exp));
+
+            
+% %         parfor class = 1:Model.numClasses
+% %             obj{class} = gmdistribution.fit(SamplesTrain.data(train_labels == class,:),Model.bayes.nodes(exp),'CovType','diagonal','SharedCov',true,'Regularize',Model.bayes.params(exp), 'RegularizationValue', Model.bayes.regularizationValue(exp)); % Fitting category1 to object 1
+% %         end;
+% %     
+% %         output = [];
+% %         for class = 1:Model.numClasses 
+% %             output = [output pdf(obj{class},SamplesTrain.data)]; 
+% %         end;
+% %         [~,indexes] = max(output,[],2);
+% %         accuracyTrain(exp) = sum(train_labels==indexes')/size(train_labels',1); 
+% %     
+% %     
+% %         output = [];
+% %         for class = 1:Model.numClasses 
+% %             output = [output pdf(obj{class},SamplesTest.data)]; 
+% %         end;
+% %         [~,indexes] = max(output,[],2);
+% %         accuracyTest(exp) = sum(test_labels==indexes')/size(test_labels',1);    
+            
+
+
+    end;
+
+    Model.test.layer{layer+1}.scoreBayesTrain(r,:) = accuracyTrain;
+    Model.test.layer{layer+1}.scoreBayesTest(r,:) = accuracyTest;        
+
+
+
+% %     epochs = [100];
+% %     delta = 0.001;
+% %     r = 1;
+% % 
+% %     for pipeline = 1:Model.multiple.numToyProblem
+% %         if layer == 1
+% %             dataSamplesTrain.data = SamplesTrain.data;
+% %             dataSamplesTest.data = SamplesTest.data;
+% %         else
+% %             dataSamplesTrain.data = DeepSOM{pipeline,layer-1}.BMUsValuesTrain;
+% %             dataSamplesTest.data = DeepSOM{pipeline,layer-1}.BMUsValuesTest;  
+% %         end;
+% %         if strcmp(Model.multiple.distanceType{layer},'relevance_sub_variance')
+% %             DeepSOM{pipeline,layer}.BMUsValuesTrain = som_bmusdeep(DeepSOM{pipeline,layer}.sMap, dataSamplesTrain, 'ALL',pipeline,Model.multiple.sigmaAtive(layer), Model,[],Model.multiple.distanceType(layer),layer,DeepSOM{pipeline,layer}.relevance);
+% %             DeepSOM{pipeline,layer}.BMUsValuesTest = som_bmusdeep(DeepSOM{pipeline,layer}.sMap, dataSamplesTest, 'ALL',pipeline,Model.multiple.sigmaAtive(layer), Model,[],Model.multiple.distanceType(layer),layer,DeepSOM{pipeline,layer}.relevance);        
+% %         else
+% %             DeepSOM{pipeline,layer}.BMUsValuesTrain = som_bmusdeep(DeepSOM{pipeline,layer}.sMap, dataSamplesTrain, 'ALL',pipeline,Model.multiple.sigmaAtive(layer), Model,[],Model.multiple.distanceType(layer),layer,[]);
+% %             DeepSOM{pipeline,layer}.BMUsValuesTest = som_bmusdeep(DeepSOM{pipeline,layer}.sMap, dataSamplesTest, 'ALL',pipeline,Model.multiple.sigmaAtive(layer), Model,[],Model.multiple.distanceType(layer),layer,[]);                            
+% %         end;
+% %     end;
+% % 
+% %     dataTrain = concatPipelines(Model, DeepSOM, layer, 'train', Model.multiple.numToyProblem);
+% %     dataTest = concatPipelines(Model, DeepSOM, layer, 'test', Model.multiple.numToyProblem);   
+% % 
+% %     [acurracyDensityTrain,~,ratioBMUsTrain,macthesDensityTrain,~,indexesWinnersTrain, errorMatrix,correctNodes,incorrectNodes,pipelineCorrectOrderTrain, errorMatrixSamplesTrain, correctNodeGlobalOrderTrain, correctNodesTotal, incorrectNodesTotal] = ... 
+% %         debugMeanWinners(Model, dataTrain, layer, Model.multiple.numMap(layer), train_labels,'descend');
+% %     [acurracyDensityTest,~,ratioBMUsTest,macthesDensityTest,~,indexesWinnersTest, errorMatrix,correctNodesTest,incorrectNodesTest,pipelineCorrectOrderTest, errorMatrixSamplesTest, correctNodeGlobalOrderTest] = ...
+% %         debugMeanWinners(Model, dataTest, layer, Model.multiple.numMap(layer), test_labels,'descend');   
+% % 
+% %     [~,indexesTrain] = max(dataTrain'); 
+% %     [~,nodes] = size(dataTrain);
+% %     P_C_j = zeros(1,nodes);
+% %     for index = 1:length(indexesTrain)
+% %         P_C_j(indexesTrain(index)) = P_C_j(indexesTrain(index)) + 1; 
+% %     end;
+% %     P_C_j = P_C_j /sum(P_C_j);
+
+end
