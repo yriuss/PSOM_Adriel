@@ -212,15 +212,16 @@ function ModelCollection = createModelMultiple(Model,classes,index)
             numMaps = [24 24 24 24 24]; %[16 16 16 16 16; 20 20 20 20 20; 24 24 24 24 24; 30 30 30 30 30; 36 36 36 36 36];
             window = [16 16 16 16 16; 10 10 10 10 10; 7 7 7 7 7; 5 5 5 5 5]; %[36 16 9; 18 16 6; 9 16 3];  %[36 36 36; 36 18 18; 36 9 9]; %[18 8 2; 18 16 2; 18 32 2];    
             epochs = [16 16 16 16 16; 20 20 20 20 20; 40 40 40 40 40; 100 100 100 100 100; 500 500 500 500 500]; %[10 10 10; 10 20 20; 10 40 40]; %[10 40 10; 10 40 20; 10 40 40]; %[10 10 10; 10 20 10; 10 40 10]; %[10 10 10; 10 20 10; 10 40 10; 10 100 10];   
-         elseif strcmp(Model.database,'mnist')
+        elseif strcmp(Model.database,'mnist')
             numMaps = [4 4 4 4 4;  8 8 8 8 8; 12 12 12 12 12; 16 16 16 16 16];
             window = [7 7 7 7 7; 5 5 5 5 5; 3 3 3 3 3]; %[36 16 9; 18 16 6; 9 16 3];  %[36 36 36; 36 18 18; 36 9 9]; %[18 8 2; 18 16 2; 18 32 2];    
             epochs = [10 10 10 10 10; 20 20 20 20 20; 40 40 40 40 40]; %[10 10 10; 10 20 20; 10 40 40]; %[10 40 10; 10 40 20; 10 40 40]; %[10 10 10; 10 20 10; 10 40 10]; %[10 10 10; 10 20 10; 10 40 10; 10 100 10];   
-         elseif strcmp(Model.database,'ms_coco')
+        elseif strcmp(Model.database,'ms_coco')
             numMaps = [64 64 64 64 64];        
             window = [32 16 16 9 9; 16 9 16 9 9; 16 4 9 6 6];    
             epochs = [3 3 3 3 3];
-         elseif strcmp(Model.database,'uofa')
+        elseif true
+            display("DANGER ZONE!!!")
             numMaps = [4 4 4 4 4];        
             window = [4 4 4 4 4; 3 3 3 3 3];    
             epochs = [10 10 10 10 10; 50 50 50 50 50];
@@ -567,7 +568,8 @@ function ModelCollection = createModelMultiple(Model,classes,index)
     elseif  strcmp(Model.database,'15_Scenes')
         centersThreshold = [0]; %[0.84:0.02:0.92]'; %[0]; %[0 1 0.5 -0.5 -1]'; 
         unlearnedRate = [0 0 0 0 0]; %[0.01 0.01 0.01 0.01 0.01; 0.05 0.05 0.05 0.05 0.05; 0.1 0.1 0.1 0.1 0.1]; %
-    elseif  strcmp(Model.database,'uofa')
+    elseif  true
+        display("DANGER ZONE!!!")
         centersThreshold = [0]; %[0.84:0.02:0.92]'; %[0]; %[0 1 0.5 -0.5 -1]'; 
         unlearnedRate = [0 0 0 0 0]; %[0.01 0.01 0.01 0.01 0.01; 0.05 0.05 0.05 0.05 0.05; 0.1 0.1 0.1 0.1 0.1]; %
     end;

@@ -12,7 +12,6 @@ function [dataTrain, dataTest, train_labels, test_labels, Model] = DeepSOM(numCl
     SamplesTrain = som_read_data(fileNameTrain);
     SamplesTest = som_read_data(fileNameTest);
     
-    
     if strcmp(pipeline,'multiple') | strcmp(pipeline,'single_multiple')
         Model.pipelineExec = 'multiple';
         NumMap = Model.multiple.numMap;

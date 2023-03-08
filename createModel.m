@@ -48,7 +48,7 @@ elseif strcmp(database,'mnist')
     classes = 10;       
 elseif strcmp(database,'motion_tracking')  
     classes = 6;
-elseif strcmp(database, 'uofa')
+elseif strcmp(database(1:4), 'uofa')
     classes = 15;
 elseif strcmp(database, 'kitti')
     classes = 15;
@@ -68,6 +68,8 @@ flagPlotMapActive = 'no';
 flagPlotDebugWinners = 'yes';
 flagPlotDebugBMUs = 'no';
 flagPlotDebugData = 'no';
+
+database
 
 dir  = ['logs/figs/' database '/'];
 dirResults  = ['logs/results/' database '/'];
@@ -96,6 +98,9 @@ histogram = 'histogram/';
 test.num = 1;
 
 files = what(dirModels);
+
+files
+
 len = length(files.mat);
 for i = 1:len
     delete([dirModels char(files.mat(i))]);
