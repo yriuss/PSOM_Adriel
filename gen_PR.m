@@ -9,7 +9,7 @@ function D = gen_PR(dataset)
 
 
     for i = 1:length(files)
-        res = {res load(dir_path+files(i).mat)};
+        res = {res load(dir_path+files(i).name)};
     end
 
     res
