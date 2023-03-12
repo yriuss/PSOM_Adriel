@@ -5,13 +5,13 @@ function D = gen_PR(dataset)
     dir_path = "logs/results/"+dataset+"/multiple/";
     files = dir(fullfile(dir_path, "results_layer_*_single_*_fator_*_multiple_*_fator_*.mat"));
     
-    res = string(1:length(files));
+    res = {};
 
 
     for i = 1:length(files)
         file_name = string(files(i).name);
         class(dir_path+file_name)
-        res(i) = load(dir_path+file_name);
+        res(i) = {res load(dir_path+file_name)};
         error("dklasj")
     end
 
