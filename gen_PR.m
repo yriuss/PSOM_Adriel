@@ -5,18 +5,19 @@ function D = gen_PR(dataset)
     dir_path = "logs/results/"+dataset+"/multiple/";
     files = dir(fullfile(dir_path, "results_layer_*_single_*_fator_*_multiple_*_fator_*.mat"));
     
-    res = cell(length(files),1);
+    file_names = string(1:length(files));
 
 
     for i = 1:length(files)
         file_name = string(files(i).name);
-        res(i) = {load(dir_path+file_name)};
+        file_names(i) = dir_path+file_name;
     end
 
 
-    for i = 1:length(res)
-        [~,best_idx] = max(res{i}.Model.test.layer{2}.scoreTest);
-        var = res{i}.Model.test.layer{2}.dataTest{best_idx};
+    for i = 1:length(file_names)
+        res = load(file_names(i));
+        [~,best_idx] = max(res.Model.test.layer{2}.scoreTest);
+        var = res.Model.test.layer{2}.dataTest{best_idx};
         
         parts = strsplit(dataset, '_');
         last_part = parts{end};
@@ -77,7 +78,7 @@ function D = gen_PR(dataset)
         set(gca, 'box', 'on');
 
         points = [TPR;PPV];
-        save("logs/results/"+dataset+"/multiple/"+Model.name+"_pr"+".mat",'points')
+        save("logs/results/"+dataset+"/multiple/"+file_names+"_pr"+".mat",'points')
 
         error("djklsa")
     end
