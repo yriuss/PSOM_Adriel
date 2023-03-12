@@ -5,12 +5,11 @@ function D = gen_PR(dataset)
     dir_path = "logs/results/"+dataset+"/multiple/";
     files = dir(fullfile(dir_path, "results_layer_*_single_*_fator_*_multiple_*_fator_*.mat"));
     
-    res = {};
+    res = cell(length(files),1);
 
 
     for i = 1:length(files)
         file_name = string(files(i).name);
-        class(dir_path+file_name)
         res = {res load(dir_path+file_name)};
     end
 
