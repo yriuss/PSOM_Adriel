@@ -1,7 +1,7 @@
 % Adriel
 
 function D = gen_PR(dataset)
-    plot = true;
+    plt = true;
     dir_path = "logs/results/"+dataset+"/multiple/";
     files = dir(fullfile(dir_path, "results_layer_*_single_*_fator_*_multiple_*_fator_*.mat"));
     
@@ -73,7 +73,7 @@ function D = gen_PR(dataset)
             PPV(thr) = TP/(TP+FP);%precision
         end
 
-        if(plot)
+        if(plt)
             cols = [200 45 43; 37 64 180; 0 176 80; 0 0 0]/255;
             figure,hold on;
             plot(TPR, PPV, '-o', 'color', cols(1,:), 'linewidth', 2);
