@@ -4,14 +4,16 @@ function D = gen_PR(dataset)
 
     dir_path = "logs/results/"+dataset+"/multiple/";
     files = dir(fullfile(dir_path, "results_layer_*_single_*_fator_*_multiple_*_fator_*.mat"));
-    files
-    error("parrar aqui")
     
+    res = cell(numel(files), 1);
 
 
     for i = 1:length(files)
-        res = load(dir_path+file);
+        res(i) = load(dir_path+file(i));
     end
+
+    res
+    error("dklasj")
 
     for i = 1:length(res)
         [~,best_idx] = max(res(i).Model.test.layer{2}.scoreTest);
