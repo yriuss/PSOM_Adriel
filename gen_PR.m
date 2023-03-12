@@ -13,6 +13,9 @@ function D = gen_PR(dataset)
         file_names(i) = file_name;
     end
 
+    if ~exist(dir_path+"pr/", 'dir')
+        mkdir(dir_path+"pr/")
+    end
 
     for ii = 1:length(file_names)
         res = load(dir_path+file_names(i));
@@ -78,7 +81,7 @@ function D = gen_PR(dataset)
         set(gca, 'box', 'on');
 
         points = [TPR;PPV];
-        save("logs/results/"+dataset+"/multiple/"+file_names(ii)+"_pr"+".mat",'points')
+        save(dir_path+"pr/"+file_names(ii)+"_pr"+".mat",'points')
 
         error("djklsa")
     end
