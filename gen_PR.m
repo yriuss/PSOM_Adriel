@@ -78,7 +78,7 @@ function D = gen_PR(dataset)
         set(gca, 'box', 'on');
 
         points = [TPR;PPV];
-        save("logs/results/"+dataset+"/multiple/"+file_names+"_pr"+".mat",'points')
+        save("logs/results/"+dataset+"/multiple/"+file_names(i)+"_pr"+".mat",'points')
 
         error("djklsa")
     end
