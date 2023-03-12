@@ -7,6 +7,8 @@ function D = gen_PR(dataset)
     
     res = {}
 
+    files(1).name
+    error("dsalçjk")
 
     for i = 1:length(files)
         res = {res load(dir_path+files(i).name)};
