@@ -8,7 +8,7 @@ function D = gen_PR(dataset)
     res = string(1:length(files));
 
     for i = 1:length(files)
-        res(i) = load(dir_path+string(files{i}.name));
+        res(i) = load(dir_path+string(files(i).name));
         error("dklasj")
     end
 
