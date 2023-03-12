@@ -1,8 +1,8 @@
 % Adriel
 
 function D = gen_PR(dataset)
-    
-    res = load("logs/results/"+dataset+"/multiple/"+regexp("results_layer_.*_single_.*_fator_.*_multiple_.*_fator_.*.mat", 'once'));
+    file = regexp("results_layer_.*_single_.*_fator_.*_multiple_.*_fator_.*.mat", 'once');
+    res = load("logs/results/"+dataset+"/multiple/"+file);
 
     for i = 1:length(res)
         [~,best_idx] = max(res(i).Model.test.layer{2}.scoreTest);
