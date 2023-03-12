@@ -1,7 +1,7 @@
 % Adriel
 
 function D = gen_PR(dataset)
-    plt = true;
+    plt = false;
     dir_path = "logs/results/"+dataset+"/multiple/";
     files = dir(fullfile(dir_path, "results_layer_*_single_*_fator_*_multiple_*_fator_*.mat"));
     
