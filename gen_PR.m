@@ -11,7 +11,7 @@ function D = gen_PR(dataset)
     error("daskl")
 
     for i = 1:length(files)
-        res(i) = load(dir_path+string(files(i).name));
+        res(i) = load(dir_path+string(files(1).name));
         error("dklasj")
     end
 
