@@ -19,7 +19,7 @@ function D = gen_PR(dataset)
 
     for ii = 1:length(file_names)
         res = load(dir_path+file_names(ii));
-        res
+        dir_path+file_names(ii)
         [~,best_idx] = max(res.Model.test.layer{2}.scoreTest);
         var = res.Model.test.layer{2}.dataTest{best_idx};
         
