@@ -4,14 +4,12 @@ function D = gen_PR(dataset)
 
     dir_path = "logs/results/"+dataset+"/multiple/";
     files = dir(fullfile(dir_path, "results_layer_*_single_*_fator_*_multiple_*_fator_*.mat"));
-    files 
-
-    error("asdlç")
-    res = cell(numel(files), 1);
+    
+    res = {}
 
 
     for i = 1:length(files)
-        res(i) = load(dir_path+files(i));
+        res = {res load(dir_path+files(i).mat)};
     end
 
     res
