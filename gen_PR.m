@@ -82,7 +82,5 @@ function D = gen_PR(dataset)
 
         points = [TPR;PPV];
         save(dir_path+"pr/"+file_names(ii)+"_pr"+".mat",'points')
-
-        error("djklsa")
     end
 end
