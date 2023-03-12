@@ -3,7 +3,7 @@
 function D = gen_PR(dataset)
 
     dir_path = "logs/results/"+dataset+"/multiple/";
-    files = dir(fullfile(dir_path, "results_layer_.*_single_.*_fator_.*_multiple_.*_fator_.*.mat"));
+    files = dir(fullfile(dir_path, "results_layer_*_single_*_fator_*_multiple_*_fator_*.mat"));
     files
     error("parrar aqui")
     
