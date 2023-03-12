@@ -7,7 +7,9 @@ function D = gen_PR(dataset)
     
     res = string(1:length(files));
 
-
+    files(i).name
+    class(files(i).name)
+    error("djklsa")
     for i = 1:length(files)
         res(i) = load(dir_path+files(i).name);
     end
