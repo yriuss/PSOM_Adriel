@@ -399,12 +399,14 @@ function [dataTrain, dataTest, train_labels, test_labels, Model] = DeepSOM(numCl
              Model.test.layer{i+1}.meanConfuseMatrixTest = Model.test.layer{i+1}.meanConfuseMatrixTest./repmat(sumTest,1,numClass);        
     
     
-        
+             if ~exist(Model.dir.resultsMultiple)
+                mkdir(Model.dir.resultsMultiple);
+             end
     
              name = [Model.dir.resultsMultiple ...
                  'results_layer_' num2str(i+1) '_single_' num2str(Model.single.index) '_fator_' ...
                     num2str(Model.single.indexFator) '_multiple_' num2str(Model.multiple.index) ...
-                    '_fator_' num2str(Model.multiple.indexFator) '.mat']; 
+                    '_fator_' num2str(Model.multiple.indexFator) '.mat'];
              if i == (Model.numLayer-1)   
                 save(name,'Model');  
              end;

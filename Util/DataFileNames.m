@@ -115,35 +115,12 @@ function [fileNameTrain, fileNameTest] = DataFileNames(Model, k)
     elseif strcmp(Model.database,'sun_rgbd_vgg') || strcmp(Model.database,'sun_rgbd')
             fileNameTrain = [diretory 'sun_rgbd_vgg/sun_rgbd_vgg_training.csv']; %[diretory '15_Scenes_4200_train.data'];
             fileNameTest = [diretory 'sun_rgbd_vgg/sun_rgbd_vgg_testing.csv']; %[diretory '15_Scenes_4200_test.data'];              
-    elseif strcmp(Model.database,'uofa_clusters200_seqsize1_surf')
-        fileNameTrain = [diretory 'uofa_clusters200_seqsize1/SURF_sequence1.csv']; %[diretory '15_Scenes_4200_train.data'];
-        fileNameTest = [diretory 'uofa_clusters200_seqsize1/SURF_sequence2.csv']; %[diretory '15_Scenes_4200_test.data'];   
-    elseif strcmp(Model.database,'uofa_clusters200_seqsize3_surf')
-        fileNameTrain = [diretory 'uofa_clusters200_seqsize3/SURF_sequence1.csv']; %[diretory '15_Scenes_4200_train.data'];
-        fileNameTest = [diretory 'uofa_clusters200_seqsize3/SURF_sequence2.csv']; %[diretory '15_Scenes_4200_test.data'];   
-    elseif strcmp(Model.database,'uofa_clusters200_seqsize5_surf')
-        fileNameTrain = [diretory 'uofa_clusters200_seqsize5/SURF_sequence1.csv']; %[diretory '15_Scenes_4200_train.data'];
-        fileNameTest = [diretory 'uofa_clusters200_seqsize5/SURF_sequence2.csv']; %[diretory '15_Scenes_4200_test.data'];   
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif strcmp(Model.database,'uofa_clusters200_seqsize1_sift')
-        fileNameTrain = [diretory 'uofa_clusters200_seqsize1/SIFT_sequence1.csv']; %[diretory '15_Scenes_4200_train.data'];
-        fileNameTest = [diretory 'uofa_clusters200_seqsize1/SIFT_sequence2.csv']; %[diretory '15_Scenes_4200_test.data'];   
-    elseif strcmp(Model.database,'uofa_clusters200_seqsize3_sift')
-        fileNameTrain = [diretory 'uofa_clusters200_seqsize3/SIFT_sequence1.csv']; %[diretory '15_Scenes_4200_train.data'];
-        fileNameTest = [diretory 'uofa_clusters200_seqsize3/SIFT_sequence2.csv']; %[diretory '15_Scenes_4200_test.data'];   
-    elseif strcmp(Model.database,'uofa_clusters200_seqsize5_sift')
-        fileNameTrain = [diretory 'uofa_clusters200_seqsize5/SIFT_sequence1.csv']; %[diretory '15_Scenes_4200_train.data'];
-        fileNameTest = [diretory 'uofa_clusters200_seqsize5/SIFT_sequence2.csv']; %[diretory '15_Scenes_4200_test.data'];   
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    elseif strcmp(Model.database,'uofa_clusters200_seqsize1_orb')
-        fileNameTrain = [diretory 'uofa_clusters200_seqsize1/ORB_sequence1.csv']; %[diretory '15_Scenes_4200_train.data'];
-        fileNameTest = [diretory 'uofa_clusters200_seqsize1/ORB_sequence2.csv']; %[diretory '15_Scenes_4200_test.data'];   
-    elseif strcmp(Model.database,'uofa_clusters200_seqsize3_orb')
-        fileNameTrain = [diretory 'uofa_clusters200_seqsize3/ORB_sequence1.csv']; %[diretory '15_Scenes_4200_train.data'];
-        fileNameTest = [diretory 'uofa_clusters200_seqsize3/ORB_sequence2.csv']; %[diretory '15_Scenes_4200_test.data'];   
-    elseif strcmp(Model.database,'uofa_clusters200_seqsize5_orb')
-        fileNameTrain = [diretory 'uofa_clusters200_seqsize5/ORB_sequence1.csv']; %[diretory '15_Scenes_4200_train.data'];
-        fileNameTest = [diretory 'uofa_clusters200_seqsize5/ORB_sequence2.csv']; %[diretory '15_Scenes_4200_test.data'];   
+    elseif strcmp(Model.database(1:4),'uofa')
+        parts = strsplit(Model.database, '_');
+        desc = parts{end};
+        
+        fileNameTrain = cell2mat([diretory join(parts(1:end - 1), '_') '/' desc '_sequence1.csv']); %[diretory '15_Scenes_4200_train.data'];
+        fileNameTest = cell2mat([diretory join(parts(1:end - 1), '_') '/' desc '_sequence2.csv']); %[diretory '15_Scenes_4200_test.data'];  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 

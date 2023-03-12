@@ -69,7 +69,6 @@ flagPlotDebugWinners = 'yes';
 flagPlotDebugBMUs = 'no';
 flagPlotDebugData = 'no';
 
-database
 
 dir  = ['logs/figs/' database '/'];
 dirResults  = ['logs/results/' database '/'];
@@ -77,7 +76,11 @@ dirMaps  = ['logs/maps/' database '/'];
 dirOutput  = ['logs/output/' database '/'];
 dirDebug  = ['logs/debug/' database '/'];
 dirPlotData  = ['logs/plot_data/' database '/'];
-dirModels  = ['logs/models/' database '/'];
+if(strcmp(database(1:4), 'uofa'))
+    dirModels  = ['logs/models/' database(1:4) '/'];
+else
+    dirModels  = ['logs/models/' database '/'];
+end
 
 resultsSingle = [dirResults 'single/'];
 resultsMultiple = [dirResults 'multiple/'];
@@ -99,7 +102,6 @@ test.num = 1;
 
 files = what(dirModels);
 
-files
 
 len = length(files.mat);
 for i = 1:len

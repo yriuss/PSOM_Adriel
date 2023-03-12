@@ -220,8 +220,7 @@ function ModelCollection = createModelMultiple(Model,classes,index)
             numMaps = [64 64 64 64 64];        
             window = [32 16 16 9 9; 16 9 16 9 9; 16 4 9 6 6];    
             epochs = [3 3 3 3 3];
-        elseif true
-            display("DANGER ZONE!!!")
+        elseif strcmp(Model.database(1:4),'uofa')
             numMaps = [4 4 4 4 4];        
             window = [4 4 4 4 4; 3 3 3 3 3];    
             epochs = [10 10 10 10 10; 50 50 50 50 50];
@@ -568,8 +567,7 @@ function ModelCollection = createModelMultiple(Model,classes,index)
     elseif  strcmp(Model.database,'15_Scenes')
         centersThreshold = [0]; %[0.84:0.02:0.92]'; %[0]; %[0 1 0.5 -0.5 -1]'; 
         unlearnedRate = [0 0 0 0 0]; %[0.01 0.01 0.01 0.01 0.01; 0.05 0.05 0.05 0.05 0.05; 0.1 0.1 0.1 0.1 0.1]; %
-    elseif  true
-        display("DANGER ZONE!!!")
+    elseif  strcmp(Model.database(1:4),'uofa')
         centersThreshold = [0]; %[0.84:0.02:0.92]'; %[0]; %[0 1 0.5 -0.5 -1]'; 
         unlearnedRate = [0 0 0 0 0]; %[0.01 0.01 0.01 0.01 0.01; 0.05 0.05 0.05 0.05 0.05; 0.1 0.1 0.1 0.1 0.1]; %
     end;

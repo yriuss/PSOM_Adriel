@@ -2,11 +2,20 @@ function [Mean] = Test(database, DataCompressionType, index)
 
     %database = getDatabaseName(Classes);
 
-    load(['logs/models/' database '/model_' num2str(index) '.mat']);     
+    if(strcmp(database(1:4), 'uofa'))
+        load(['logs/models/' database(1:4) '/model_' num2str(index) '.mat']);
+    else
+        load(['logs/models/' database '/model_' num2str(index) '.mat']);
+    end
     
     disp('Train begin...');
 
     disp('Compressing data...');
+
+    if ~exist(Model.dir.output)
+        mkdir(Model.dir.output);
+     end
+
     name = [Model.dir.output 'Output_single_'  num2str(Model.single.index) '_fator_' ...
                 num2str(Model.single.indexFator) '_multiple_' num2str(Model.multiple.index) ...
                 '_fator_' num2str(Model.multiple.indexFator) '.mat'];
