@@ -1,7 +1,7 @@
 % Adriel
 
 function D = gen_PR(dataset)
-
+    plot = true;
     dir_path = "logs/results/"+dataset+"/multiple/";
     files = dir(fullfile(dir_path, "results_layer_*_single_*_fator_*_multiple_*_fator_*.mat"));
     
@@ -73,12 +73,14 @@ function D = gen_PR(dataset)
             PPV(thr) = TP/(TP+FP);%precision
         end
 
-        cols = [200 45 43; 37 64 180; 0 176 80; 0 0 0]/255;
-        figure,hold on;
-        plot(TPR, PPV, '-o', 'color', cols(1,:), 'linewidth', 2);
-        axis([0 1 0 1]);
-        xlabel('TPR (recall)'); ylabel('PPV (precision)'); title('PR curves');
-        set(gca, 'box', 'on');
+        if(plot)
+            cols = [200 45 43; 37 64 180; 0 176 80; 0 0 0]/255;
+            figure,hold on;
+            plot(TPR, PPV, '-o', 'color', cols(1,:), 'linewidth', 2);
+            axis([0 1 0 1]);
+            xlabel('TPR (recall)'); ylabel('PPV (precision)'); title('PR curves');
+            set(gca, 'box', 'on');
+        end
 
         points = [TPR;PPV];
         save(dir_path+"pr/"+file_names(ii)+"_pr"+".mat",'points')
