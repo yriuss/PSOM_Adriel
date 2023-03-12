@@ -8,7 +8,7 @@ function D = gen_PR(dataset)
     res = string(1:length(files));
 
     files(1).name
-    class(files(1).name)
+    string(files(1).name)
     error("daskl")
 
     for i = 1:length(files)
