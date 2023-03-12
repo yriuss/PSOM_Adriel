@@ -84,6 +84,6 @@ function D = gen_PR(dataset)
         end
 
         points = [TPR;PPV];
-        save(dir_path+"pr/"+file_names(ii)+"_pr"+".mat",'points')
+        save(dir_path+"pr/"+file_names(ii),'points')
     end
 end
