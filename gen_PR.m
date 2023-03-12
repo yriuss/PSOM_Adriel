@@ -13,13 +13,11 @@ function D = gen_PR(dataset)
         res(i) = {load(dir_path+file_name)};
     end
 
-    res{1}
-    error("dklasj")
 
     for i = 1:length(res)
         [~,best_idx] = max(res(i).Model.test.layer{2}.scoreTest);
-        var = res.Model.test.layer{2}.dataTest{best_idx};
-
+        var = res{i}.Model.test.layer{2}.dataTest{best_idx};
+        
         parts = strsplit(dataset, '_');
         last_part = parts{end};
         new_string = strrep(dataset, "_"+last_part, '');
@@ -79,6 +77,8 @@ function D = gen_PR(dataset)
         set(gca, 'box', 'on');
 
         points = [TPR;PPV];
-        save("logs/results/"+dataset+"/multiple/"+Model.naem+"_pr"+".mat",'points')
+        save("logs/results/"+dataset+"/multiple/"+Model.name+"_pr"+".mat",'points')
+
+        error("djklsa")
     end
 end
