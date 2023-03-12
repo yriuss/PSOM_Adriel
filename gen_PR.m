@@ -15,7 +15,7 @@ function D = gen_PR(dataset)
 
 
     for i = 1:length(res)
-        [~,best_idx] = max(res(i).Model.test.layer{2}.scoreTest);
+        [~,best_idx] = max(res{i}.Model.test.layer{2}.scoreTest);
         var = res{i}.Model.test.layer{2}.dataTest{best_idx};
         
         parts = strsplit(dataset, '_');
