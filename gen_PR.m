@@ -9,9 +9,8 @@ function D = gen_PR(dataset)
 
 
     for i = 1:length(files)
-        string(files(i).name)
-        error("dklasj")
-        res(i) = load(dir_path+string(files(i).name));
+        file_name = string(files(i).name);
+        res(i) = load(dir_path+file_name);
         
     end
 
