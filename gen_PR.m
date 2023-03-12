@@ -14,7 +14,7 @@ function D = gen_PR(dataset)
     end
 
 
-    for i = 1:length(file_names)
+    for ii = 1:length(file_names)
         res = load(file_names(i));
         [~,best_idx] = max(res.Model.test.layer{2}.scoreTest);
         var = res.Model.test.layer{2}.dataTest{best_idx};
@@ -78,7 +78,7 @@ function D = gen_PR(dataset)
         set(gca, 'box', 'on');
 
         points = [TPR;PPV];
-        save("logs/results/"+dataset+"/multiple/"+file_names(i)+"_pr"+".mat",'points')
+        save("logs/results/"+dataset+"/multiple/"+file_names(ii)+"_pr"+".mat",'points')
 
         error("djklsa")
     end
