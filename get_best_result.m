@@ -13,30 +13,30 @@ function D = get_best_result(dataset)
         file_names(i) = file_name;
     end
 
-    pr = load(dir_path+file_names(1));
-    pr = pr.points
+    
+    pr = {};
 
+    for i = 1:length(file_names)
+        f = load(dir_path+file_names(1));
+        pr = {pr f.points};
+    end
 
-    error("parar aqui")
-    teste  = [0.5 0.5 0.7 0.8; 0 0.1 0.4 0.5];
-    teste2 = [0.5 0.7 1 0.8; 0 0.1 0.4 0.5];
-    teste3 = [0.5 1 0.7 0.8; 0 0.1 0.4 0.5];
+    length(pr)
+    error("paraar aqui")
 
-    testes = {teste teste2 teste3};
-
-    max_res = get_max_result(testes);
+    max_res = get_max_result(pr);
 
     D = max_res;
 
 
 end
 
-function max_res = get_max_result(testes)
+function max_res = get_max_result(pr)
     last_max = 0;
     last_max_idx = 0;
 
-    for i = 1:length(testes)
-        teste = cell2mat(testes(i));
+    for i = 1:length(pr)
+        teste = cell2mat(pr(i));
         [max_value,max_idx] = max(teste(1,:));
         max_idxs = find(teste(1,:) == teste(1,max_idx));
         
