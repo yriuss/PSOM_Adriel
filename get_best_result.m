@@ -18,7 +18,7 @@ function D = get_best_result(dataset)
 
     for i = 1:length(files)
         f = load(dir_path+file_names(i));
-        pr(i) = f.points;
+        pr(i) = {f.points};
     end
 
     pr
