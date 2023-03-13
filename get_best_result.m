@@ -18,9 +18,7 @@ function D = get_best_result(dataset)
 
     for i = 1:length(files)
         f = load(dir_path+file_names(i));
-        class([1 2; 3 4])
-        error("parar aqui")
-        pr = {pr f.points};
+        pr = {pr [f.points]};
     end
 
     pr
