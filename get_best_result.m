@@ -1,11 +1,22 @@
 % Adriel
 
-function D = get_best_result()
+function D = get_best_result(dataset)
     %plt = false;
-    %dir_path = "logs/results/"+dataset+"/multiple/";
-    %file_name = "results_layer_2_single_1_fator_1_multiple_1_fator_1.mat";
-    %
-    %res = load(file_name)
+    
+    dir_path = "logs/results/"+dataset+"/multiple/";
+    files = dir(fullfile(dir_path, "results_layer_*_single_*_fator_*_multiple_*_fator_*.mat"));
+    
+    file_names = string(1:length(files));
+
+    for i = 1:length(files)
+        file_name = string(files(i).name);
+        file_names(i) = file_name;
+    end
+
+    file_names
+
+
+    error("parar aqui")
     teste  = [0.5 0.5 0.7 0.8; 0 0.1 0.4 0.5];
     teste2 = [0.5 0.7 1 0.8; 0 0.1 0.4 0.5];
     teste3 = [0.5 1 0.7 0.8; 0 0.1 0.4 0.5];
