@@ -14,11 +14,11 @@ function D = get_best_result(dataset)
     end
 
     
-    pr = {};
+    pr = cell(1,length(file_names));
 
     for i = 1:length(files)
         f = load(dir_path+file_names(i));
-        pr = {pr [f.points]};
+        pr(i) = f.points;
     end
 
     pr
