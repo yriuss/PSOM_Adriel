@@ -18,7 +18,8 @@ function D = get_best_result(dataset)
 
     for i = 1:length(files)
         f = load(dir_path+file_names(i));
-        pr = {pr cell2mat(f.points)};
+        f = cell2mat(f.points);
+        pr = {pr f};
     end
 
     pr
