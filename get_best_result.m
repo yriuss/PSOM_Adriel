@@ -21,7 +21,7 @@ function D = get_best_result(dataset)
         pr = {pr f.points};
     end
 
-    size(pr)
+    pr
     error("paraar aqui")
 
     max_res = get_max_result(pr);
