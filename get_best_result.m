@@ -3,8 +3,8 @@
 function D = get_best_result(dataset)
     %plt = false;
     
-    dir_path = "logs/results/"+dataset+"/multiple/";
-    files = dir(fullfile(dir_path, "results_layer_*_single_*_fator_*_multiple_*_fator_*.mat"));
+    dir_path = "logs/results/"+dataset+"/multiple/pr/";
+    files = dir(fullfile(dir_path, "pr_results_layer_*_single_*_fator_*_multiple_*_fator_*.mat"));
     
     file_names = string(1:length(files));
 
