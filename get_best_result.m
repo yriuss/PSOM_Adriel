@@ -14,7 +14,7 @@ function D = get_best_result()
 
     max_res = get_max_result(testes);
 
-    
+    D = max_res;
 
 
 end
