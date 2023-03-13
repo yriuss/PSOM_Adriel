@@ -18,7 +18,8 @@ function D = get_best_result(dataset)
 
     for i = 1:length(files)
         f = load(dir_path+file_names(i));
-        f = cell2mat(f.points);
+        f.points
+        error("parar aqui")
         pr = {pr f};
     end
 
