@@ -13,7 +13,8 @@ function D = get_best_result(dataset)
         file_names(i) = file_name;
     end
 
-    pr = load(dir_path+file_names(1))
+    pr = load(dir_path+file_names(1));
+    pr = pr.points
 
 
     error("parar aqui")
