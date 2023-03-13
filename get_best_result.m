@@ -27,7 +27,7 @@ function max_res = get_best_result(dataset, plt)
     if(plt)
         cols = [200 45 43; 37 64 180; 0 176 80; 0 0 0]/255;
         figure,hold on;
-        plot(pr{10}(1,:), pr{10}(2,:), '-o', 'color', cols(1,:), 'linewidth', 2);
+        plot(pr{100}(1,:), pr{100}(2,:), '-o', 'color', cols(1,:), 'linewidth', 2);
         axis([0 1 0 1]);
         xlabel('TPR (recall)'); ylabel('PPV (precision)'); title('PR curves');
         set(gca, 'box', 'on');
