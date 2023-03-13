@@ -20,9 +20,7 @@ function D = get_best_result(dataset)
         f = load(dir_path+file_names(i));
         pr(i) = {f.points};
     end
-
-    pr
-    error("paraar aqui")
+    
 
     max_res = get_max_result(pr);
 
